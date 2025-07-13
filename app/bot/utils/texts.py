@@ -6,7 +6,6 @@ from aiogram.utils.markdown import hbold
 # You can also keep only one language by removing the line with the unwanted language.
 SUPPORTED_LANGUAGES = {
     "ru": "🇷🇺 Русский",
-    "en": "🇬🇧 English",
 }
 
 
@@ -21,7 +20,7 @@ class Text(metaclass=ABCMeta):
 
         :param language_code: The language code (e.g., "ru" or "en").
         """
-        self.language_code = language_code if language_code in SUPPORTED_LANGUAGES.keys() else "en"
+        self.language_code = language_code if language_code in SUPPORTED_LANGUAGES.keys() else "ru"
 
     @property
     @abstractmethod
