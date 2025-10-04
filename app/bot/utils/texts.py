@@ -133,7 +133,10 @@ class TextMessage(Text):
                     "<blockquote>При включенном тихом режиме сообщения не отправляются пользователю.</blockquote>\n\n"
                     "• /information\n"
                     "Информация о пользователе"
-                    "<blockquote>Получить сообщение с основной информацией о пользователе.</blockquote>"
+                    "<blockquote>Получить сообщение с основной информацией о пользователе.</blockquote>\n\n"
+                    "• /keys\n"
+                    "Ключи пользователя"
+                    "<blockquote>Получить ключи пользователя</blockquote>"
                 ),
                 "user_restarted_bot": f"Пользователь {hbold('{name}')} перезапустил(а) бота!",
                 "user_stopped_bot": f"Пользователь {hbold('{name}')} остановил(а) бота!",

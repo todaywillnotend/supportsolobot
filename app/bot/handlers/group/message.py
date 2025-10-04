@@ -10,6 +10,75 @@ from aiogram.utils.markdown import hlink
 from app.bot.manager import Manager
 from app.bot.types.album import Album
 from app.bot.utils.redis import RedisStorage
+# # Импорт для работы с базой данных
+# from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+# from sqlalchemy.orm import sessionmaker
+# from sqlalchemy import text  # Добавлен импорт text
+# from datetime import datetime  # Добавлен импорт datetime
+
+# from environs import Env
+
+# env = Env()
+# env.read_env()
+
+# DATABASE_URL = f"postgresql+asyncpg://{env.str('DB_USER')}:{env.str('DB_PASSWORD')}@{env.str('PG_HOST')}:{env.str('PG_PORT')}/{env.str('DB_NAME')}"
+
+# engine = create_async_engine(DATABASE_URL)
+# async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+
+# # Функция для получения ключей из БД
+# async def get_keys(session: AsyncSession, tg_id: int):
+#     # Используем text для SQL запроса
+#     query = text("""
+#         SELECT * FROM keys WHERE tg_id = :tg_id
+#     """)
+    
+#     result = await session.execute(query, {"tg_id": tg_id})
+#     return result.mappings().all()  # Возвращаем список словарей
+
+# # Функция для получения и форматирования информации о ключах пользователя
+# async def get_user_keys_info(tg_id: int) -> str:
+#     try:
+#         async with async_session() as session:
+#             keys = await get_keys(session, tg_id)
+            
+#             if not keys:
+#                 return "У пользователя нет активных ключей."
+            
+#             result = "🔑 <b>Информация о ключах пользователя:</b>\n\n"
+            
+#             for i, key in enumerate(keys, 1):
+#                 expiry_time = key.get('expiry_time', 0)
+#                 expiry_date = datetime.utcfromtimestamp(expiry_time / 1000) if expiry_time else datetime.utcnow()
+#                 current_date = datetime.utcnow()
+#                 time_left = expiry_date - current_date
+                
+#                 if time_left.total_seconds() <= 0:
+#                     status = "❌ истек"
+#                 else:
+#                     status = f"✅ активен (осталось {time_left.days} дней)"
+                
+#                 result += (
+#                     f"<b>Ключ #{i}:</b>\n"
+#                     f"• ID: <code>{key.get('client_id', 'не указан')}</code>\n"
+#                     f"• Email: <code>{key.get('email', 'не указан')}</code>\n"
+#                     f"• Сервер: <code>{key.get('server_id', 'не указан')}</code>\n"
+#                     f"• Статус: {status}\n"
+#                     f"• Срок действия до: {expiry_date.strftime('%d.%m.%Y %H:%M')}\n"
+#                 )
+                
+#                 if key.get('tariff_id'):
+#                     result += f"• Тариф: {key.get('tariff_id')}\n"
+                
+#                 result += f"• Заморожен: {'Да' if key.get('is_frozen') else 'Нет'}\n\n"
+            
+#             return result
+#     except Exception as e:
+#         import traceback
+#         error_details = traceback.format_exc()
+#         print(f"Ошибка при получении информации о ключах: {e}\n{error_details}")
+#         return f"Ошибка при получении информации о ключах пользователя: {e}"
 
 router = Router()
 router.message.filter(
@@ -17,7 +86,6 @@ router.message.filter(
     F.chat.type.in_(["group", "supergroup"]),
     F.message_thread_id.is_not(None),
 )
-
 
 @router.message(F.forum_topic_created)
 async def handler(message: Message, manager: Manager, redis: RedisStorage) -> None:
@@ -30,6 +98,32 @@ async def handler(message: Message, manager: Manager, redis: RedisStorage) -> No
 
     # Get the appropriate text based on the user's state
     text = manager.text_message.get("user_started_bot")
+
+    # # Базовое сообщение без информации о ключах
+    # base_text = text.format(name=hlink(user_data.full_name, url))
+
+    # try:
+    #     # Пытаемся получить информацию о ключах
+    #     keys_info = await get_user_keys_info(user_data.id)
+    #     full_text = base_text + f"\n\n{keys_info}"
+        
+    #     message = await message.bot.send_message(
+    #         chat_id=manager.config.bot.GROUP_ID,
+    #         text=full_text,
+    #         message_thread_id=user_data.message_thread_id,
+    #         parse_mode="HTML"
+    #     )
+    # except Exception as e:
+    #     import traceback
+    #     error_details = traceback.format_exc()
+    #     print(f"Ошибка при формировании сообщения с ключами: {e}\n{error_details}")
+    #     # Отправляем сообщение без информации о ключах
+    #     message = await message.bot.send_message(
+    #         chat_id=manager.config.bot.GROUP_ID,
+    #         text=base_text,
+    #         message_thread_id=user_data.message_thread_id,
+    #         parse_mode="HTML"
+    #     )
 
     message = await message.bot.send_message(
         chat_id=manager.config.bot.GROUP_ID,
