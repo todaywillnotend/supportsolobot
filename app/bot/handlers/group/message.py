@@ -18,7 +18,6 @@ router.message.filter(
     F.message_thread_id.is_not(None),
 )
 
-
 @router.message(F.forum_topic_created)
 async def handler(message: Message, manager: Manager, redis: RedisStorage) -> None:
     await asyncio.sleep(3)
